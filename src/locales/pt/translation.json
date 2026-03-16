@@ -1,0 +1,27 @@
+{
+    "errors": {
+        "taskNotFound": "Tarefa não encontrada",
+        "createTaskError": "Erro ao criar tarefa",
+        "updateTaskError": "Erro ao atualizar tarefa",
+        "deleteTaskError": "Erro ao excluir tarefa",
+        "fetchTasksError": "Erro ao buscar tarefas",
+        "notAuthenticated": "Não autenticado",
+        "userNotFound": "Usuário não encontrado",
+        "cannotUpdateRole": "Não é possível atualizar a função",
+        "fetchUsersError": "Erro ao buscar usuários",
+        "updateUserError": "Erro ao atualizar usuário",
+        "deleteUserError": "Erro ao excluir usuário",
+        "unauthorized": "Não autorizado",
+        "forbidden": "Proibido: Permissões insuficientes",
+        "maxTagsError": "Máximo de 10 tags por tarefa",
+        "tagNotFound": "Tag não encontrada",
+        "deleteTagError": "Erro ao excluir tag"
+    },
+    "success": {
+        "taskCreated": "Tarefa criada com sucesso",
+        "taskUpdated": "Tarefa atualizada com sucesso",
+        "taskDeleted": "Tarefa excluída com sucesso",
+        "userDeleted": "Usuário excluído com sucesso",
+        "tagDeleted": "Tag excluída com sucesso"
+    }
+}

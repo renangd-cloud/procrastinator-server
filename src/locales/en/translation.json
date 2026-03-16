@@ -1,0 +1,27 @@
+{
+    "errors": {
+        "taskNotFound": "Task not found",
+        "createTaskError": "Error creating task",
+        "updateTaskError": "Error updating task",
+        "deleteTaskError": "Error deleting task",
+        "fetchTasksError": "Error fetching tasks",
+        "notAuthenticated": "Not authenticated",
+        "userNotFound": "User not found",
+        "cannotUpdateRole": "Cannot update role",
+        "fetchUsersError": "Error fetching users",
+        "updateUserError": "Error updating user",
+        "deleteUserError": "Error deleting user",
+        "unauthorized": "Unauthorized",
+        "forbidden": "Forbidden: Insufficient permissions",
+        "maxTagsError": "Max 10 tags per task",
+        "tagNotFound": "Tag not found",
+        "deleteTagError": "Error deleting tag"
+    },
+    "success": {
+        "taskCreated": "Task created successfully",
+        "taskUpdated": "Task updated successfully",
+        "taskDeleted": "Task deleted successfully",
+        "userDeleted": "User deleted successfully",
+        "tagDeleted": "Tag deleted successfully"
+    }
+}
