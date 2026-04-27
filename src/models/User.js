@@ -35,4 +35,22 @@ const User = sequelize.define('User', {
     updatedAt: 'updateDate',
 });
 
+User.prototype.checkUpdatePermissions = function(currentUser, updateData) {
+    if (currentUser.role !== 'Admin' && currentUser.id !== this.id) {
+        const error = new Error('errors.forbidden');
+        error.status = 403;
+        throw error;
+    }
+
+    if (updateData.role && currentUser.role !== 'Admin') {
+        const error = new Error('errors.cannotUpdateRole');
+        error.status = 403;
+        throw error;
+    }
+};
+
+User.prototype.softDelete = async function() {
+    await this.update({ deleted: true });
+};
+
 module.exports = User;

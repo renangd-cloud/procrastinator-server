@@ -1,29 +1,17 @@
-const { Tag, sequelize } = require('../models');
-const Log = require('../models/Log');
+const TagService = require('../services/TagService');
 
 const createTag = async (req, res) => {
-    const t = await sequelize.transaction();
     try {
-        const { name, color } = req.body;
-        const tag = await Tag.create({ name, color }, { transaction: t });
-
-        await t.commit();
-        await Log.create({
-            level: 'info',
-            message: `Tag created: ${name}`,
-            meta: { userId: req.user.id, tagId: tag.id }
-        });
-
+        const tag = await TagService.createTag(req.body, req.user.id);
         res.json(tag);
     } catch (err) {
-        await t.rollback();
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : err.message });
     }
 };
 
 const getTags = async (req, res) => {
     try {
-        const tags = await Tag.findAll({ where: { deleted: false } });
+        const tags = await TagService.getTags();
         res.json(tags);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -31,45 +19,20 @@ const getTags = async (req, res) => {
 };
 
 const updateTag = async (req, res) => {
-    const t = await sequelize.transaction();
     try {
-        const tag = await Tag.findByPk(req.params.id);
-        if (!tag) {
-            await t.rollback();
-            return res.status(404).json({ message: req.t('errors.tagNotFound') });
-        }
-
-        const { name, color } = req.body;
-        await tag.update({ name, color }, { transaction: t });
-        await t.commit();
-        await Log.create({
-            level: 'info',
-            message: `Tag updated: ${name}`,
-            meta: { userId: req.user.id, tagId: tag.id }
-        });
-
+        const tag = await TagService.updateTag(req.params.id, req.body, req.user.id);
         res.json(tag);
     } catch (err) {
-        await t.rollback();
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : err.message });
     }
 };
 
 const deleteTag = async (req, res) => {
     try {
-        const tag = await Tag.findByPk(req.params.id);
-        if (!tag) return res.status(404).json({ message: req.t('errors.tagNotFound') });
-
-        await tag.update({ deleted: true });
-        await Log.create({
-            level: 'info',
-            message: `Tag deleted: ${tag.name}`,
-            meta: { userId: req.user.id, tagId: tag.id }
-        });
-
-        res.json({ message: req.t('success.tagDeleted') });
+        const result = await TagService.deleteTag(req.params.id, req.user.id);
+        res.json({ message: req.t(result.message) });
     } catch (err) {
-        res.status(500).json({ message: req.t('errors.deleteTagError') });
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : req.t('errors.deleteTagError') });
     }
 };
 

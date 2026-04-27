@@ -38,4 +38,22 @@ const ShoppingItem = sequelize.define('ShoppingItem', {
     updatedAt: 'updateDate',
 });
 
+ShoppingItem.getCategoriesSuggestions = async function(userId) {
+    const { Sequelize } = require('sequelize');
+    const categories = await this.findAll({
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('category')), 'category']],
+        where: { userId }
+    });
+    return categories.map(c => c.category).filter(c => c && c.trim() !== '');
+};
+
+ShoppingItem.getMarketsSuggestions = async function(userId) {
+    const { Sequelize } = require('sequelize');
+    const markets = await this.findAll({
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('market')), 'market']],
+        where: { userId }
+    });
+    return markets.map(m => m.market).filter(m => m && m.trim() !== '');
+};
+
 module.exports = ShoppingItem;
