@@ -87,6 +87,40 @@ class TaskService {
         }
     }
 
+    static async getReminders(userId) {
+        try {
+            const user = await User.findByPk(userId);
+            const leadTimeHours = (user && user.preferences && user.preferences.reminderLeadTimeHours) !== undefined 
+                ? user.preferences.reminderLeadTimeHours 
+                : 24;
+
+            const thresholdDate = new Date();
+            thresholdDate.setHours(thresholdDate.getHours() + leadTimeHours);
+
+            const tasks = await Task.findAll({
+                where: {
+                    userId,
+                    deleted: false,
+                    active: true,
+                    status: { [Op.ne]: 'Completed' },
+                    dueDate: {
+                        [Op.not]: null,
+                        [Op.lte]: thresholdDate
+                    }
+                },
+                include: TaskService.#getTaskDetailsInclude(),
+                order: [['dueDate', 'ASC']]
+            });
+
+            return tasks;
+        } catch (err) {
+            console.error('Error in getReminders:', err);
+            const error = new Error('errors.fetchRemindersError');
+            error.status = 500;
+            throw error;
+        }
+    }
+
     static async getTaskById(id, userId) {
         const task = await Task.findOne({
             where: { id, userId, deleted: false },
