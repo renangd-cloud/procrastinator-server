@@ -28,6 +28,7 @@ class TaskService {
         try {
             if (data.date === '' || data.date === 'Invalid date') data.date = null;
             if (data.dueDate === '' || data.dueDate === 'Invalid date') data.dueDate = null;
+            if (data.recurrenceType === '') data.recurrenceType = null;
 
             if (data.tags && data.tags.length > 10) {
                 const error = new Error('errors.maxTagsError');
@@ -42,7 +43,8 @@ class TaskService {
             });
         } catch (err) {
             console.error('Error creating task:', err);
-            if(!err.status) err.message = 'errors.createTaskError';
+            require('fs').writeFileSync('c:/dsv/antigravity/procrastinator/server/last_error.txt', err.stack || err.message);
+            err.status = err.status || 500;
             throw err;
         }
     }
@@ -109,6 +111,7 @@ class TaskService {
 
             if (data.date === '' || data.date === 'Invalid date') data.date = null;
             if (data.dueDate === '' || data.dueDate === 'Invalid date') data.dueDate = null;
+            if (data.recurrenceType === '') data.recurrenceType = null;
 
             if (data.tags && data.tags.length > 10) {
                 const error = new Error('errors.maxTagsError');
@@ -123,7 +126,10 @@ class TaskService {
             });
         } catch (err) {
             console.error("Update Error", err);
-            if(!err.status) err.message = 'errors.updateTaskError';
+            if(!err.status) {
+                err.message = 'errors.updateTaskError';
+                err.status = 500;
+            }
             throw err;
         }
     }
@@ -181,7 +187,10 @@ class TaskService {
             });
         } catch (err) {
             console.error('Error in duplicateTask:', err);
-            if(!err.status) err.message = 'errors.createTaskError';
+            if(!err.status) {
+                err.message = 'errors.createTaskError';
+                err.status = 500;
+            }
             throw err;
         }
     }

@@ -279,6 +279,12 @@ Task.update = async function(task, data, userId) {
         if (!task.isRecurring && !isRecurring) {
             definitionUpdate.status = status;
             definitionUpdate.date = date;
+
+            // Auto-assign today's date if completed without a date (DDD persistence rule)
+            if (status === 'Completed' && !date) {
+                const { format } = require('date-fns');
+                definitionUpdate.date = format(new Date(), 'yyyy-MM-dd');
+            }
         }
 
         task.set(definitionUpdate);
