@@ -1,0 +1,9 @@
+Error
+    at Query.run (C:\dsv\antigravity\procrastinator\server\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\dsv\antigravity\procrastinator\server\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.insert (C:\dsv\antigravity\procrastinator\server\node_modules\sequelize\lib\dialects\abstract\query-interface.js:308:21)
+    at async model.save (C:\dsv\antigravity\procrastinator\server\node_modules\sequelize\lib\model.js:2490:35)
+    at async Task.create (C:\dsv\antigravity\procrastinator\server\src\models\Task.js:221:9)
+    at async TaskService.createTask (C:\dsv\antigravity\procrastinator\server\src\services\TaskService.js:38:28)
+    at async createTask (C:\dsv\antigravity\procrastinator\server\src\controllers\taskController.js:5:33)

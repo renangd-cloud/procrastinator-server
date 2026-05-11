@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const Log = require('./Log');
-
+const TaskLog = require('./TaskLog');
 const Task = sequelize.define('Task', {
     id: {
         type: DataTypes.UUID,
@@ -235,6 +235,12 @@ Task.create = async function(data, userId) {
                 message: `Task created: ${title}`,
                 meta: { userId, taskId: task.id }
             });
+            await TaskLog.create({
+                taskId: task.id,
+                userId: userId,
+                actionType: 'CREATION',
+                comment: 'Task criada.'
+            });
         } catch (logErr) {
             console.error('Error creating log:', logErr);
         }
@@ -249,15 +255,22 @@ Task.create = async function(data, userId) {
 Task.update = async function(task, data, userId) {
     const t = await sequelize.transaction();
     try {
-        let { title, description, date, dueDate, status, priority, tags, subtasks, dependencies, isRecurring, recurrenceType, recurrenceDays, active } = data;
+        let { title, description, date, dueDate, status, priority, tags, subtasks, dependencies, isRecurring, recurrenceType, recurrenceDays, active, reason } = data;
 
         let targetExecution = await task.handleExecutionUpdate(date, status, userId, t);
 
         let definitionUpdate = { title, description, dueDate, priority, isRecurring, recurrenceType, recurrenceDays, active };
 
+        let isInactivation = false;
         if (active !== undefined) {
             if (active === false && task.active !== false) {
+                if (!reason || reason.trim() === '') {
+                    const error = new Error('Motivo da inativação é obrigatório.');
+                    error.status = 400;
+                    throw error;
+                }
                 definitionUpdate.inactivatedAt = new Date();
+                isInactivation = true;
             } else if (active === true) {
                 definitionUpdate.inactivatedAt = null;
             }
@@ -266,9 +279,28 @@ Task.update = async function(task, data, userId) {
         if (!task.isRecurring && !isRecurring) {
             definitionUpdate.status = status;
             definitionUpdate.date = date;
+
+            // Auto-assign today's date if completed without a date (DDD persistence rule)
+            if (status === 'Completed' && !date) {
+                const { format } = require('date-fns');
+                definitionUpdate.date = format(new Date(), 'yyyy-MM-dd');
+            }
         }
 
         task.set(definitionUpdate);
+        
+        let changedFields = task.changed();
+        let changes = null;
+        if (changedFields) {
+            changes = {};
+            changedFields.forEach(field => {
+                changes[field] = {
+                    old: task.previous(field),
+                    new: task.get(field)
+                };
+            });
+        }
+
         await task.save({ transaction: t });
 
         await task.syncTags(tags, t);
@@ -286,6 +318,15 @@ Task.update = async function(task, data, userId) {
                 message: `Task updated: ${task.title}`,
                 meta: { userId, taskId: task.id, updates: data }
             });
+            if (changes || isInactivation) {
+                await TaskLog.create({
+                    taskId: task.id,
+                    userId: userId,
+                    actionType: isInactivation ? 'INACTIVATION' : 'UPDATE',
+                    changes: changes,
+                    comment: isInactivation ? reason : null
+                });
+            }
         } catch (logErr) {
             console.error('Error creating log:', logErr);
         }
@@ -334,6 +375,12 @@ Task.duplicate = async function(sourceTask, title, userId) {
                 level: 'info',
                 message: `Task duplicated: ${sourceTask.title} -> ${title}`,
                 meta: { userId, originalTaskId: sourceTask.id, newTaskId: newTask.id }
+            });
+            await TaskLog.create({
+                taskId: newTask.id,
+                userId: userId,
+                actionType: 'CREATION',
+                comment: 'Task duplicada a partir de outra.'
             });
         } catch (logErr) {
             console.error('Error creating log:', logErr);

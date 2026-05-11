@@ -3,13 +3,21 @@ const Task = require('./Task');
 const Subtask = require('./Subtask');
 const Tag = require('./Tag');
 const TaskDependency = require('./TaskDependency');
-
+const TaskLog = require('./TaskLog');
 const TaskExecution = require('./TaskExecution');
 const SubtaskExecution = require('./SubtaskExecution');
 
 // User - Task Association
 User.hasMany(Task, { foreignKey: 'userId' });
 Task.belongsTo(User, { foreignKey: 'userId' });
+
+// Task - TaskLog Association
+Task.hasMany(TaskLog, { foreignKey: 'taskId', as: 'Logs' });
+TaskLog.belongsTo(Task, { foreignKey: 'taskId' });
+
+// User - TaskLog Association
+User.hasMany(TaskLog, { foreignKey: 'userId' });
+TaskLog.belongsTo(User, { foreignKey: 'userId' });
 
 // Task - Subtask Association
 Task.hasMany(Subtask, { foreignKey: 'taskId' });
@@ -59,5 +67,6 @@ module.exports = {
     Tag,
     TaskDependency,
     TaskExecution,
-    SubtaskExecution
+    SubtaskExecution,
+    TaskLog
 };

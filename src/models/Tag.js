@@ -35,7 +35,7 @@ Tag.prototype.auditLog = async function(action, userId) {
     });
 };
 
-Tag.create = async function({ name, color }, userId) {
+Tag.createWithAudit = async function({ name, color }, userId) {
     const t = await sequelize.transaction();
     try {
         const tag = this.build({ name, color });
@@ -44,12 +44,12 @@ Tag.create = async function({ name, color }, userId) {
         await tag.auditLog('created', userId);
         return tag;
     } catch (err) {
-        await t.rollback();
+        if (!t.finished) await t.rollback();
         throw err;
     }
 };
 
-Tag.prototype.update = async function({ name, color }, userId) {
+Tag.prototype.updateWithAudit = async function({ name, color }, userId) {
     const t = await sequelize.transaction();
     try {
         this.set({ name, color });
@@ -58,7 +58,7 @@ Tag.prototype.update = async function({ name, color }, userId) {
         await this.auditLog('updated', userId);
         return this;
     } catch (err) {
-        await t.rollback();
+        if (!t.finished) await t.rollback();
         throw err;
     }
 };

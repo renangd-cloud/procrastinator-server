@@ -2,7 +2,7 @@ const { Tag } = require('../models');
 
 class TagService {
     static async createTag({ name, color }, userId) {
-        return await Tag.create({ name, color }, userId);
+        return await Tag.createWithAudit({ name, color }, userId);
     }
 
     static async getTags() {
@@ -17,7 +17,7 @@ class TagService {
             throw error;
         }
 
-        return await tag.update({ name, color }, userId);
+        return await tag.updateWithAudit({ name, color }, userId);
     }
 
     static async deleteTag(id, userId) {

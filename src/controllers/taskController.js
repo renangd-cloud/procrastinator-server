@@ -54,13 +54,33 @@ const duplicateTask = async (req, res) => {
     }
 };
 
+const getTaskLogs = async (req, res) => {
+    try {
+        const logs = await TaskService.getTaskLogs(req.params.id, req.user.id);
+        res.json(logs);
+    } catch (err) {
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : err.message });
+    }
+};
+
+const addTaskComment = async (req, res) => {
+    try {
+        const log = await TaskService.addTaskComment(req.params.id, req.body.comment, req.user.id);
+        res.status(201).json(log);
+    } catch (err) {
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : err.message });
+    }
+};
+
 module.exports = {
     createTask,
     getTasks,
     getTaskById,
     updateTask,
     deleteTask,
-    duplicateTask
+    duplicateTask,
+    getTaskLogs,
+    addTaskComment
 };
 
 

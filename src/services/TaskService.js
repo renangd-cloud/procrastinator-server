@@ -1,4 +1,4 @@
-const { Task, Subtask, Tag, TaskExecution, SubtaskExecution } = require('../models');
+const { Task, Subtask, Tag, TaskExecution, SubtaskExecution, TaskLog, User } = require('../models');
 const Log = require('../models/Log');
 const { Op } = require('sequelize');
 const { format } = require('date-fns');
@@ -28,6 +28,7 @@ class TaskService {
         try {
             if (data.date === '' || data.date === 'Invalid date') data.date = null;
             if (data.dueDate === '' || data.dueDate === 'Invalid date') data.dueDate = null;
+            if (data.recurrenceType === '') data.recurrenceType = null;
 
             if (data.tags && data.tags.length > 10) {
                 const error = new Error('errors.maxTagsError');
@@ -42,7 +43,8 @@ class TaskService {
             });
         } catch (err) {
             console.error('Error creating task:', err);
-            if(!err.status) err.message = 'errors.createTaskError';
+            require('fs').writeFileSync('c:/dsv/antigravity/procrastinator/server/last_error.txt', err.stack || err.message);
+            err.status = err.status || 500;
             throw err;
         }
     }
@@ -109,6 +111,7 @@ class TaskService {
 
             if (data.date === '' || data.date === 'Invalid date') data.date = null;
             if (data.dueDate === '' || data.dueDate === 'Invalid date') data.dueDate = null;
+            if (data.recurrenceType === '') data.recurrenceType = null;
 
             if (data.tags && data.tags.length > 10) {
                 const error = new Error('errors.maxTagsError');
@@ -123,7 +126,10 @@ class TaskService {
             });
         } catch (err) {
             console.error("Update Error", err);
-            if(!err.status) err.message = 'errors.updateTaskError';
+            if(!err.status) {
+                err.message = 'errors.updateTaskError';
+                err.status = 500;
+            }
             throw err;
         }
     }
@@ -181,9 +187,56 @@ class TaskService {
             });
         } catch (err) {
             console.error('Error in duplicateTask:', err);
-            if(!err.status) err.message = 'errors.createTaskError';
+            if(!err.status) {
+                err.message = 'errors.createTaskError';
+                err.status = 500;
+            }
             throw err;
         }
+    }
+    static async getTaskLogs(taskId, userId) {
+        const task = await Task.findOne({ where: { id: taskId, userId, deleted: false } });
+        if (!task) {
+            const error = new Error('errors.taskNotFound');
+            error.status = 404;
+            throw error;
+        }
+
+        const logs = await TaskLog.findAll({
+            where: { taskId },
+            include: [{ model: User, attributes: ['name'] }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        return logs;
+    }
+
+    static async addTaskComment(taskId, comment, userId) {
+        if (!comment || comment.trim() === '') {
+            const error = new Error('O comentário não pode ser vazio.');
+            error.status = 400;
+            throw error;
+        }
+
+        const task = await Task.findOne({ where: { id: taskId, userId, deleted: false } });
+        if (!task) {
+            const error = new Error('errors.taskNotFound');
+            error.status = 404;
+            throw error;
+        }
+
+        const log = await TaskLog.create({
+            taskId: taskId,
+            userId: userId,
+            actionType: 'COMMENT',
+            comment: comment
+        });
+
+        const createdLog = await TaskLog.findByPk(log.id, {
+            include: [{ model: User, attributes: ['name'] }]
+        });
+
+        return createdLog;
     }
 }
 
