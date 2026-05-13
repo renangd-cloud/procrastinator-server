@@ -18,6 +18,15 @@ const getTasks = async (req, res) => {
     }
 };
 
+const getReminders = async (req, res) => {
+    try {
+        const reminders = await TaskService.getReminders(req.user.id);
+        res.json(reminders);
+    } catch (err) {
+        res.status(err.status || 500).json({ message: err.status ? req.t(err.message) : err.message });
+    }
+};
+
 const getTaskById = async (req, res) => {
     try {
         const task = await TaskService.getTaskById(req.params.id, req.user.id);
@@ -75,6 +84,7 @@ const addTaskComment = async (req, res) => {
 module.exports = {
     createTask,
     getTasks,
+    getReminders,
     getTaskById,
     updateTask,
     deleteTask,
