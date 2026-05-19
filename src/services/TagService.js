@@ -29,7 +29,7 @@ class TagService {
         }
 
         await tag.update({ deleted: true });
-        await tag.auditLog('deleted', userId);
+        await tag.auditLog('logs.tagDeleted', userId);
 
         return { message: 'success.tagDeleted' };
     }

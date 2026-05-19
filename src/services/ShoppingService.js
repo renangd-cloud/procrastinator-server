@@ -1,4 +1,5 @@
 const { ShoppingItem } = require('../models');
+const { PREDEFINED_CATEGORIES, PREDEFINED_MARKETS } = require('../constants/ShoppingCategories');
 
 class ShoppingService {
     static async getShoppingItems(userId) {
@@ -17,9 +18,9 @@ class ShoppingService {
         let categories = await ShoppingItem.getCategoriesSuggestions(userId);
         let markets = await ShoppingItem.getMarketsSuggestions(userId);
 
-        // Predefined suggestions
-        const predefinedCategories = ['Fruit', 'Vegetable', 'Meat', 'Dairy', 'Bakery', 'Cleaning', 'Other'];
-        const predefinedMarkets = ['Supermarket', 'Grocery Store', 'Pharmacy', 'Butcher', 'Bakery', 'Other'];
+        // Predefined suggestions (defined centrally in ShoppingCategories constants)
+        const predefinedCategories = PREDEFINED_CATEGORIES;
+        const predefinedMarkets = PREDEFINED_MARKETS;
 
         // Merge and remove duplicates
         categories = [...new Set([...predefinedCategories, ...categories])];

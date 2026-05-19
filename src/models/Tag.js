@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const LogLevel = require('../constants/LogLevel');
 
 const Tag = sequelize.define('Tag', {
     id: {
@@ -26,11 +27,11 @@ const Tag = sequelize.define('Tag', {
     updatedAt: 'updateDate',
 });
 
-Tag.prototype.auditLog = async function(action, userId) {
+Tag.prototype.auditLog = async function(actionKey, userId) {
     const { Log } = sequelize.models;
     await Log.create({
-        level: 'info',
-        message: `Tag ${action}: ${this.name}`,
+        level: LogLevel.INFO,
+        message: `${actionKey}: ${this.name}`,
         meta: { userId, tagId: this.id }
     });
 };
@@ -41,7 +42,7 @@ Tag.createWithAudit = async function({ name, color }, userId) {
         const tag = this.build({ name, color });
         await tag.save({ transaction: t });
         await t.commit();
-        await tag.auditLog('created', userId);
+        await tag.auditLog('logs.tagCreated', userId);
         return tag;
     } catch (err) {
         if (!t.finished) await t.rollback();
@@ -55,7 +56,7 @@ Tag.prototype.updateWithAudit = async function({ name, color }, userId) {
         this.set({ name, color });
         await this.save({ transaction: t });
         await t.commit();
-        await this.auditLog('updated', userId);
+        await this.auditLog('logs.tagUpdated', userId);
         return this;
     } catch (err) {
         if (!t.finished) await t.rollback();

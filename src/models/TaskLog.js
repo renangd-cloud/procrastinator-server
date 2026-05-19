@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const TaskLogActionType = require('../constants/TaskLogActionType');
 
 const TaskLog = sequelize.define('TaskLog', {
     id: {
@@ -24,7 +25,7 @@ const TaskLog = sequelize.define('TaskLog', {
         }
     },
     actionType: {
-        type: DataTypes.ENUM('CREATION', 'UPDATE', 'INACTIVATION', 'COMMENT'),
+        type: DataTypes.ENUM(...Object.values(TaskLogActionType)),
         allowNull: false,
     },
     changes: {
