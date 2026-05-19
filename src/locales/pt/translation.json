@@ -5,6 +5,10 @@
         "updateTaskError": "Erro ao atualizar tarefa",
         "deleteTaskError": "Erro ao excluir tarefa",
         "fetchTasksError": "Erro ao buscar tarefas",
+        "fetchRemindersError": "Erro ao buscar lembretes",
+        "taskAlreadyExists": "Já existe uma tarefa com este título",
+        "inactivationReasonRequired": "O motivo da inativação é obrigatório",
+        "commentRequired": "O comentário não pode ser vazio",
         "notAuthenticated": "Não autenticado",
         "userNotFound": "Usuário não encontrado",
         "cannotUpdateRole": "Não é possível atualizar a função",
@@ -15,13 +19,22 @@
         "forbidden": "Proibido: Permissões insuficientes",
         "maxTagsError": "Máximo de 10 tags por tarefa",
         "tagNotFound": "Tag não encontrada",
-        "deleteTagError": "Erro ao excluir tag"
+        "deleteTagError": "Erro ao excluir tag",
+        "itemNotFound": "Item não encontrado"
     },
     "success": {
         "taskCreated": "Tarefa criada com sucesso",
         "taskUpdated": "Tarefa atualizada com sucesso",
         "taskDeleted": "Tarefa excluída com sucesso",
         "userDeleted": "Usuário excluído com sucesso",
-        "tagDeleted": "Tag excluída com sucesso"
+        "tagDeleted": "Tag excluída com sucesso",
+        "itemDeleted": "Item excluído com sucesso"
+    },
+    "logs": {
+        "taskCreated": "Tarefa criada.",
+        "taskDuplicated": "Tarefa duplicada a partir de outra.",
+        "tagCreated": "Tag criada",
+        "tagUpdated": "Tag atualizada",
+        "tagDeleted": "Tag excluída"
     }
 }

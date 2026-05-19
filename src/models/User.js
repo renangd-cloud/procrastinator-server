@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
+const UserRole = require('../constants/UserRole');
 
 const User = sequelize.define('User', {
     id: {
@@ -17,8 +18,8 @@ const User = sequelize.define('User', {
         unique: true,
     },
     role: {
-        type: DataTypes.ENUM('Admin', 'User'),
-        defaultValue: 'User',
+        type: DataTypes.ENUM(...Object.values(UserRole)),
+        defaultValue: UserRole.USER,
     },
     deleted: {
         type: DataTypes.BOOLEAN,
@@ -36,13 +37,13 @@ const User = sequelize.define('User', {
 });
 
 User.prototype.checkUpdatePermissions = function(currentUser, updateData) {
-    if (currentUser.role !== 'Admin' && currentUser.id !== this.id) {
+    if (currentUser.role !== UserRole.ADMIN && currentUser.id !== this.id) {
         const error = new Error('errors.forbidden');
         error.status = 403;
         throw error;
     }
 
-    if (updateData.role && currentUser.role !== 'Admin') {
+    if (updateData.role && currentUser.role !== UserRole.ADMIN) {
         const error = new Error('errors.cannotUpdateRole');
         error.status = 403;
         throw error;

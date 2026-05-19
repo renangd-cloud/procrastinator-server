@@ -5,6 +5,10 @@
         "updateTaskError": "Error updating task",
         "deleteTaskError": "Error deleting task",
         "fetchTasksError": "Error fetching tasks",
+        "fetchRemindersError": "Error fetching reminders",
+        "taskAlreadyExists": "A task with this title already exists",
+        "inactivationReasonRequired": "Inactivation reason is required",
+        "commentRequired": "Comment cannot be empty",
         "notAuthenticated": "Not authenticated",
         "userNotFound": "User not found",
         "cannotUpdateRole": "Cannot update role",
@@ -15,13 +19,22 @@
         "forbidden": "Forbidden: Insufficient permissions",
         "maxTagsError": "Max 10 tags per task",
         "tagNotFound": "Tag not found",
-        "deleteTagError": "Error deleting tag"
+        "deleteTagError": "Error deleting tag",
+        "itemNotFound": "Item not found"
     },
     "success": {
         "taskCreated": "Task created successfully",
         "taskUpdated": "Task updated successfully",
         "taskDeleted": "Task deleted successfully",
         "userDeleted": "User deleted successfully",
-        "tagDeleted": "Tag deleted successfully"
+        "tagDeleted": "Tag deleted successfully",
+        "itemDeleted": "Item deleted successfully"
+    },
+    "logs": {
+        "taskCreated": "Task created.",
+        "taskDuplicated": "Task duplicated from another task.",
+        "tagCreated": "Tag created",
+        "tagUpdated": "Tag updated",
+        "tagDeleted": "Tag deleted"
     }
 }

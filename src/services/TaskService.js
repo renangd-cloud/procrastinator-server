@@ -2,6 +2,8 @@ const { Task, Subtask, Tag, TaskExecution, SubtaskExecution, TaskLog, User } = r
 const Log = require('../models/Log');
 const { Op } = require('sequelize');
 const { format } = require('date-fns');
+const TaskStatus = require('../constants/TaskStatus');
+const TaskLogActionType = require('../constants/TaskLogActionType');
 
 class TaskService {
     static #getTaskDetailsInclude() {
@@ -102,7 +104,7 @@ class TaskService {
                     userId,
                     deleted: false,
                     active: true,
-                    status: { [Op.ne]: 'Completed' },
+                    status: { [Op.ne]: TaskStatus.COMPLETED },
                     dueDate: {
                         [Op.not]: null,
                         [Op.lte]: thresholdDate
@@ -247,7 +249,7 @@ class TaskService {
 
     static async addTaskComment(taskId, comment, userId) {
         if (!comment || comment.trim() === '') {
-            const error = new Error('O comentário não pode ser vazio.');
+            const error = new Error('errors.commentRequired');
             error.status = 400;
             throw error;
         }
@@ -262,7 +264,7 @@ class TaskService {
         const log = await TaskLog.create({
             taskId: taskId,
             userId: userId,
-            actionType: 'COMMENT',
+            actionType: TaskLogActionType.COMMENT,
             comment: comment
         });
 

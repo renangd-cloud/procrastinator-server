@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const TaskStatus = require('../constants/TaskStatus');
 
 const TaskExecution = sequelize.define('TaskExecution', {
     id: {
@@ -20,8 +21,8 @@ const TaskExecution = sequelize.define('TaskExecution', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('Pending', 'Completed'),
-        defaultValue: 'Pending',
+        type: DataTypes.ENUM(...Object.values(TaskStatus)),
+        defaultValue: TaskStatus.PENDING,
     },
     userId: {
         type: DataTypes.UUID,

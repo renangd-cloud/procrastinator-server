@@ -2,6 +2,12 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const Log = require('./Log');
 const TaskLog = require('./TaskLog');
+const TaskStatus = require('../constants/TaskStatus');
+const TaskLogActionType = require('../constants/TaskLogActionType');
+const LogLevel = require('../constants/LogLevel');
+const TaskPriority = require('../constants/TaskPriority');
+const TaskRecurrenceType = require('../constants/TaskRecurrenceType');
+
 const Task = sequelize.define('Task', {
     id: {
         type: DataTypes.UUID,
@@ -24,12 +30,12 @@ const Task = sequelize.define('Task', {
         allowNull: true,
     },
     status: {
-        type: DataTypes.ENUM('Pending', 'Completed'),
-        defaultValue: 'Pending',
+        type: DataTypes.ENUM(...Object.values(TaskStatus)),
+        defaultValue: TaskStatus.PENDING,
     },
     priority: {
-        type: DataTypes.ENUM('Low', 'Medium', 'High'),
-        defaultValue: 'Medium',
+        type: DataTypes.ENUM(...Object.values(TaskPriority)),
+        defaultValue: TaskPriority.MEDIUM,
     },
     active: {
         type: DataTypes.BOOLEAN,
@@ -44,7 +50,7 @@ const Task = sequelize.define('Task', {
         defaultValue: false,
     },
     recurrenceType: {
-        type: DataTypes.ENUM('Daily', 'Weekly', 'Bi-weekly', 'Monthly'),
+        type: DataTypes.ENUM(...Object.values(TaskRecurrenceType)),
         allowNull: true,
     },
     recurrenceDays: {
@@ -97,7 +103,7 @@ Task.prototype.isBlockedByPrerequisites = function(todayStr) {
                 prereqStatus = prereqExecution.status;
             }
         }
-        return prereqStatus !== 'Completed';
+        return prereqStatus !== TaskStatus.COMPLETED;
     });
 };
 
@@ -201,7 +207,7 @@ Task.prototype.handleExecutionUpdate = async function(date, status, userId, tran
         targetExecution = await TaskExecution.create({
             taskId: this.id,
             date: date,
-            status: status || 'Pending',
+            status: status || TaskStatus.PENDING,
             userId
         }, { transaction });
     } else if (status) {
@@ -231,15 +237,15 @@ Task.create = async function(data, userId) {
         
         try {
             await Log.create({
-                level: 'info',
+                level: LogLevel.INFO,
                 message: `Task created: ${title}`,
                 meta: { userId, taskId: task.id }
             });
             await TaskLog.create({
                 taskId: task.id,
                 userId: userId,
-                actionType: 'CREATION',
-                comment: 'Task criada.'
+                actionType: TaskLogActionType.CREATION,
+                comment: 'logs.taskCreated'
             });
         } catch (logErr) {
             console.error('Error creating log:', logErr);
@@ -265,7 +271,7 @@ Task.update = async function(task, data, userId) {
         if (active !== undefined) {
             if (active === false && task.active !== false) {
                 if (!reason || reason.trim() === '') {
-                    const error = new Error('Motivo da inativação é obrigatório.');
+                    const error = new Error('errors.inactivationReasonRequired');
                     error.status = 400;
                     throw error;
                 }
@@ -281,7 +287,7 @@ Task.update = async function(task, data, userId) {
             definitionUpdate.date = date;
 
             // Auto-assign today's date if completed without a date (DDD persistence rule)
-            if (status === 'Completed' && !date) {
+            if (status === TaskStatus.COMPLETED && !date) {
                 const { format } = require('date-fns');
                 definitionUpdate.date = format(new Date(), 'yyyy-MM-dd');
             }
@@ -314,7 +320,7 @@ Task.update = async function(task, data, userId) {
         
         try {
             await Log.create({
-                level: 'info',
+                level: LogLevel.INFO,
                 message: `Task updated: ${task.title}`,
                 meta: { userId, taskId: task.id, updates: data }
             });
@@ -322,7 +328,7 @@ Task.update = async function(task, data, userId) {
                 await TaskLog.create({
                     taskId: task.id,
                     userId: userId,
-                    actionType: isInactivation ? 'INACTIVATION' : 'UPDATE',
+                    actionType: isInactivation ? TaskLogActionType.INACTIVATION : TaskLogActionType.UPDATE,
                     changes: changes,
                     comment: isInactivation ? reason : null
                 });
@@ -372,15 +378,15 @@ Task.duplicate = async function(sourceTask, title, userId) {
 
         try {
             await Log.create({
-                level: 'info',
+                level: LogLevel.INFO,
                 message: `Task duplicated: ${sourceTask.title} -> ${title}`,
                 meta: { userId, originalTaskId: sourceTask.id, newTaskId: newTask.id }
             });
             await TaskLog.create({
                 taskId: newTask.id,
                 userId: userId,
-                actionType: 'CREATION',
-                comment: 'Task duplicada a partir de outra.'
+                actionType: TaskLogActionType.CREATION,
+                comment: 'logs.taskDuplicated'
             });
         } catch (logErr) {
             console.error('Error creating log:', logErr);
